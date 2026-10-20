@@ -1,0 +1,2673 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkLayer.io</title>
+    <meta name="description"
+        content="An interactive, visual guide to the Data Link Layer: Framing, Core Functions, Parity Checks, 2D Parity, Checksums, CRC, and Multiple Access Protocols.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --bg-card-subtle: #27354f;
+            --bg-nav: rgba(15, 23, 42, 0.95);
+            --border-color: #334155;
+            --border-focus: #3b82f6;
+            --text-main: #e2e8f0;
+            --text-heading: #ffffff;
+            --text-muted: #94a3b8;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --primary-light: rgba(59, 130, 246, 0.18);
+            --secondary: #8b5cf6;
+            --accent-cyan: #06b6d4;
+            --success: #10b981;
+            --success-light: rgba(16, 185, 129, 0.18);
+            --danger: #ef4444;
+            --danger-light: rgba(239, 68, 68, 0.18);
+            --warning: #f59e0b;
+            --warning-light: rgba(245, 158, 11, 0.18);
+            --mono-font: 'JetBrains Mono', monospace;
+            --sans-font: 'Inter', system-ui, -apple-system, sans-serif;
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
+            --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.25);
+            --transition: all 0.2s ease;
+        }
+
+        [data-theme="light"] {
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --bg-card-subtle: #f1f5f9;
+            --bg-nav: rgba(255, 255, 255, 0.98);
+            --border-color: #cbd5e1;
+            --border-focus: #2563eb;
+            --text-main: #0f172a;
+            --text-heading: #000000;
+            --text-muted: #334155;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --primary-light: rgba(37, 99, 235, 0.12);
+            --secondary: #6d28d9;
+            --accent-cyan: #0369a1;
+            --success: #047857;
+            --success-light: rgba(5, 150, 105, 0.12);
+            --danger: #b91c1c;
+            --danger-light: rgba(220, 38, 38, 0.12);
+            --warning: #b45309;
+            --warning-light: rgba(217, 119, 6, 0.12);
+            --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.08);
+            --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--sans-font);
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            font-weight: 500;
+            line-height: 1.65;
+            -webkit-font-smoothing: antialiased;
+            transition: background-color 0.25s ease, color 0.25s ease;
+        }
+
+        strong,
+        b {
+            font-weight: 700;
+            color: var(--text-heading);
+        }
+
+        code {
+            font-family: var(--mono-font);
+            font-weight: 700;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            background: var(--bg-card-subtle);
+            color: var(--primary);
+        }
+
+        [data-theme="light"] code {
+            color: #1e40af;
+            background: #e2e8f0;
+        }
+
+        /* Top Progress Bar */
+        #readingProgress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: var(--primary);
+            z-index: 1000;
+            width: 0%;
+        }
+
+        /* Header Navigation */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            backdrop-filter: blur(8px);
+            background: var(--bg-nav);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0.85rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--text-heading);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .theme-toggle-btn {
+            background: var(--bg-card-subtle);
+            border: 1px solid var(--border-color);
+            color: var(--text-heading);
+            padding: 0.45rem 0.8rem;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: var(--transition);
+        }
+
+        .theme-toggle-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 4.5rem 1.5rem 3.5rem 1.5rem;
+            background: radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.12), transparent 60%);
+            border-bottom: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.2rem, 4.5vw, 3.2rem);
+            font-weight: 800;
+            color: var(--text-heading);
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+            margin-bottom: 1rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero p.lead {
+            font-size: 1.15rem;
+            font-weight: 500;
+            color: var(--text-main);
+            max-width: 720px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+
+        /* Layout */
+        .page-wrapper {
+            max-width: 1140px;
+            margin: 0 auto;
+            padding: 3rem 1.5rem;
+        }
+
+        .section-container {
+            margin-bottom: 3.5rem;
+        }
+
+        .section-header {
+            margin-bottom: 1.75rem;
+        }
+
+        .section-title {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--text-heading);
+            letter-spacing: -0.015em;
+        }
+
+        .section-desc {
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-main);
+            margin-top: 0.4rem;
+            max-width: 780px;
+        }
+
+        /* Cards & Grids */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.75rem;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.25rem;
+        }
+
+        /* Feature Cards */
+        .info-card {
+            background: var(--bg-card-subtle);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1.35rem;
+            transition: var(--transition);
+        }
+
+        .info-card:hover {
+            border-color: var(--primary);
+        }
+
+        .info-card h4 {
+            color: var(--text-heading);
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 0.4rem;
+        }
+
+        .info-card p {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-main);
+            line-height: 1.55;
+        }
+
+        .sublayer-box {
+            background: var(--bg-card-subtle);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            border-left: 4px solid var(--primary);
+        }
+
+        .sublayer-box.mac-box {
+            border-left-color: var(--accent-cyan);
+        }
+
+        .sublayer-box h3 {
+            color: var(--text-heading);
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Hop Visualizer */
+        .hop-diagram {
+            background: var(--bg-card-subtle);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+        }
+
+        .node-track {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            margin: 1.75rem 0;
+        }
+
+        .node-track::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 20px;
+            right: 20px;
+            height: 2px;
+            background: var(--border-color);
+            z-index: 1;
+        }
+
+        .node-circle {
+            z-index: 2;
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: var(--text-heading);
+        }
+
+        .node-circle.active {
+            border-color: var(--primary);
+            color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        /* Frame Blocks */
+        .frame-visualizer {
+            background: var(--bg-card-subtle);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .frame-pipeline {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1.25rem;
+            overflow-x: auto;
+            padding-bottom: 0.25rem;
+        }
+
+        .frame-block {
+            padding: 1rem 1.25rem;
+            border-radius: var(--radius-sm);
+            text-align: center;
+            cursor: pointer;
+            border: 2px solid transparent;
+            min-width: 140px;
+            transition: var(--transition);
+        }
+
+        .frame-block .fb-title {
+            font-weight: 800;
+            font-size: 1rem;
+            letter-spacing: 0.03em;
+            margin-bottom: 4px;
+        }
+
+        .frame-block .fb-size {
+            font-size: 0.84rem;
+            font-weight: 700;
+            margin-bottom: 3px;
+        }
+
+        .frame-block .fb-desc {
+            font-size: 0.76rem;
+            font-weight: 700;
+            font-family: var(--mono-font);
+        }
+
+        /* Dark mode frame blocks */
+        .frame-block.header {
+            background: #1e3a8a;
+            color: #bfdbfe;
+            border-color: #3b82f6;
+        }
+
+        .frame-block.header .fb-title {
+            color: #ffffff;
+        }
+
+        .frame-block.header .fb-size {
+            color: #93c5fd;
+        }
+
+        .frame-block.header .fb-desc {
+            color: #dbeafe;
+        }
+
+        .frame-block.payload {
+            background: #3b1d75;
+            color: #ddd6fe;
+            border-color: #8b5cf6;
+            flex-grow: 2;
+        }
+
+        .frame-block.payload .fb-title {
+            color: #ffffff;
+        }
+
+        .frame-block.payload .fb-size {
+            color: #c4b5fd;
+        }
+
+        .frame-block.payload .fb-desc {
+            color: #ede9fe;
+        }
+
+        .frame-block.trailer {
+            background: #064e3b;
+            color: #a7f3d0;
+            border-color: #10b981;
+        }
+
+        .frame-block.trailer .fb-title {
+            color: #ffffff;
+        }
+
+        .frame-block.trailer .fb-size {
+            color: #6ee7b7;
+        }
+
+        .frame-block.trailer .fb-desc {
+            color: #d1fae5;
+        }
+
+        /* Light mode frame blocks: Strong, saturated, 100% bold readable colors */
+        [data-theme="light"] .frame-block.header {
+            background: #dbeafe;
+            color: #1e3a8a;
+            border-color: #2563eb;
+        }
+
+        [data-theme="light"] .frame-block.header .fb-title {
+            color: #1e3a8a;
+            font-weight: 800;
+        }
+
+        [data-theme="light"] .frame-block.header .fb-size {
+            color: #1d4ed8;
+            font-weight: 700;
+        }
+
+        [data-theme="light"] .frame-block.header .fb-desc {
+            color: #1e40af;
+            font-weight: 700;
+        }
+
+        [data-theme="light"] .frame-block.payload {
+            background: #ede9fe;
+            color: #4c1d95;
+            border-color: #7c3aed;
+        }
+
+        [data-theme="light"] .frame-block.payload .fb-title {
+            color: #4c1d95;
+            font-weight: 800;
+        }
+
+        [data-theme="light"] .frame-block.payload .fb-size {
+            color: #5b21b6;
+            font-weight: 700;
+        }
+
+        [data-theme="light"] .frame-block.payload .fb-desc {
+            color: #6d28d9;
+            font-weight: 700;
+        }
+
+        [data-theme="light"] .frame-block.trailer {
+            background: #d1fae5;
+            color: #064e3b;
+            border-color: #059669;
+        }
+
+        [data-theme="light"] .frame-block.trailer .fb-title {
+            color: #064e3b;
+            font-weight: 800;
+        }
+
+        [data-theme="light"] .frame-block.trailer .fb-size {
+            color: #065f46;
+            font-weight: 700;
+        }
+
+        [data-theme="light"] .frame-block.trailer .fb-desc {
+            color: #047857;
+            font-weight: 700;
+        }
+
+        .frame-block:hover,
+        .frame-block.active {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+        }
+
+        [data-theme="dark"] .frame-block.active {
+            border-color: #ffffff;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.4);
+        }
+
+        [data-theme="light"] .frame-block.active {
+            border-color: #0f172a;
+            box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.3);
+        }
+
+        .frame-info-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 1.25rem;
+            font-size: 0.92rem;
+            min-height: 80px;
+        }
+
+        /* Bit Stream Boxes */
+        .bit-stream-box {
+            font-family: var(--mono-font);
+            font-size: 1.1rem;
+            padding: 0.85rem;
+            border-radius: var(--radius-sm);
+            background: var(--bg-body);
+            border: 1px solid var(--border-color);
+            display: flex;
+            justify-content: center;
+            gap: 0.35rem;
+            overflow-x: auto;
+        }
+
+        .bit-cell {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 36px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+            transition: var(--transition);
+        }
+
+        .bit-cell:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .bit-cell.flipped {
+            background: var(--danger-light);
+            border-color: var(--danger);
+            color: var(--danger);
+            font-weight: 700;
+        }
+
+        /* Forms & Inputs */
+        .sim-panel {
+            background: var(--bg-card-subtle);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .input-group label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-heading);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        input[type="text"],
+        select {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-heading);
+            font-family: var(--mono-font);
+            font-size: 0.95rem;
+            padding: 0.6rem 0.85rem;
+            border-radius: var(--radius-sm);
+            outline: none;
+            transition: var(--transition);
+        }
+
+        input[type="text"]:focus,
+        select:focus {
+            border-color: var(--primary);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.15rem;
+            font-size: 0.88rem;
+            font-weight: 600;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-heading);
+        }
+
+        .btn-outline:hover {
+            background: var(--bg-card-subtle);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.82rem;
+        }
+
+        .result-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 1.15rem;
+            font-family: var(--mono-font);
+            font-size: 0.88rem;
+            margin-top: 1rem;
+            line-height: 1.65;
+        }
+
+        /* 2D Parity Matrix Grid */
+        .matrix-table {
+            border-collapse: separate;
+            border-spacing: 5px;
+            margin: 1rem auto;
+        }
+
+        .matrix-table td,
+        .matrix-table th {
+            width: 42px;
+            height: 42px;
+            text-align: center;
+            vertical-align: middle;
+            font-family: var(--mono-font);
+            font-weight: 600;
+            font-size: 1rem;
+            border-radius: 4px;
+        }
+
+        .matrix-cell {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-heading);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .matrix-cell:hover {
+            border-color: var(--primary);
+            transform: scale(1.08);
+        }
+
+        .matrix-cell.corrupted {
+            background: var(--danger-light);
+            border-color: var(--danger);
+            color: var(--danger);
+            font-weight: 700;
+        }
+
+        .matrix-parity {
+            background: rgba(139, 92, 246, 0.2);
+            border: 2px dashed #8b5cf6;
+            color: #c4b5fd;
+            font-weight: 700;
+        }
+
+        [data-theme="light"] .matrix-parity {
+            background: #ede9fe;
+            border: 2px dashed #7c3aed;
+            color: #4c1d95;
+            font-weight: 800;
+        }
+
+        .matrix-parity.parity-error {
+            background: var(--danger-light);
+            border-color: var(--danger);
+            color: var(--danger);
+            font-weight: 800;
+        }
+
+        .matrix-header {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 700;
+        }
+
+        /* Modulo-2 Division Box */
+        .modulo-div-step {
+            font-family: var(--mono-font);
+            background: var(--bg-body);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 1.15rem;
+            overflow-x: auto;
+            white-space: pre;
+            line-height: 1.5;
+            color: #38bdf8;
+            font-size: 0.92rem;
+            font-weight: 600;
+        }
+
+        [data-theme="light"] .modulo-div-step {
+            background: #f1f5f9;
+            color: #0c4a6e;
+            font-weight: 700;
+            border-color: #cbd5e1;
+        }
+
+        /* Clean Tab Group */
+        .tab-group {
+            display: inline-flex;
+            background: var(--bg-card-subtle);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 3px;
+            gap: 3px;
+            margin: 0.75rem 0 1.25rem 0;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 0.45rem 0.9rem;
+            border-radius: 4px;
+            border: none;
+            background: transparent;
+            color: var(--text-main);
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        /* Wire Channel Simulation */
+        .wire-channel {
+            position: relative;
+            height: 60px;
+            background: var(--bg-card-subtle);
+            border: 1px dashed var(--border-color);
+            border-radius: var(--radius-sm);
+            margin: 1.5rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.5rem;
+        }
+
+        .station-badge {
+            background: var(--bg-card);
+            border: 1px solid var(--primary);
+            color: var(--text-heading);
+            padding: 0.35rem 0.75rem;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.82rem;
+        }
+
+        .packet-token {
+            position: absolute;
+            top: 14px;
+            height: 32px;
+            padding: 0 12px;
+            background: var(--primary);
+            color: white;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+            transition: left 0.1s linear;
+        }
+
+        .packet-token.collision {
+            background: var(--danger) !important;
+            box-shadow: 0 0 12px rgba(239, 68, 68, 0.6);
+        }
+
+        /* Comparison Table */
+        .table-responsive {
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+        }
+
+        table.custom-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            text-align: left;
+            background: var(--bg-card);
+        }
+
+        table.custom-table th {
+            background: var(--bg-card-subtle);
+            color: var(--text-heading);
+            padding: 0.85rem 1rem;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        table.custom-table td {
+            padding: 0.85rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-main);
+        }
+
+        table.custom-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 5px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--border-color);
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .timeline-marker {
+            position: absolute;
+            left: -1.5rem;
+            top: 5px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            border: 2px solid var(--primary);
+        }
+
+        .timeline-content {
+            background: var(--bg-card-subtle);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 1.15rem 1.25rem;
+        }
+
+        .year-tag {
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.15rem 0.45rem;
+            border-radius: 3px;
+            background: var(--primary-light);
+            color: var(--primary);
+            margin-right: 0.4rem;
+        }
+
+        /* Quiz */
+        .quiz-question {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-heading);
+            margin-bottom: 1.25rem;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.65rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .quiz-option {
+            background: var(--bg-card-subtle);
+            border: 1px solid var(--border-color);
+            padding: 0.85rem 1.15rem;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.92rem;
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+        }
+
+        .quiz-option:hover {
+            border-color: var(--primary);
+        }
+
+        .quiz-option.correct {
+            background: var(--success-light) !important;
+            border-color: var(--success) !important;
+            color: var(--success) !important;
+            font-weight: 600;
+        }
+
+        .quiz-option.wrong {
+            background: var(--danger-light) !important;
+            border-color: var(--danger) !important;
+            color: var(--danger) !important;
+        }
+
+        .quiz-feedback {
+            padding: 0.9rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            display: none;
+            margin-top: 1rem;
+        }
+
+        /* Callout */
+        .callout {
+            border-left: 3px solid var(--primary);
+            background: var(--primary-light);
+            padding: 1rem 1.25rem;
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+            margin: 1.25rem 0;
+            font-size: 0.92rem;
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--border-color);
+            background: var(--bg-card);
+            padding: 3rem 1.5rem 2rem 1.5rem;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.88rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1.25rem;
+            margin-bottom: 1.5rem;
+            list-style: none;
+        }
+
+        .footer-links a {
+            color: var(--text-main);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .footer-links a:hover {
+            color: var(--primary);
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero {
+                padding: 3rem 1rem 2rem 1rem;
+            }
+
+            .card {
+                padding: 1.25rem;
+            }
+
+            .form-row {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="readingProgress"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="brand">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round" style="color: var(--primary);">
+                    <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                    <polyline points="2 17 12 22 22 17"></polyline>
+                    <polyline points="2 12 12 17 22 12"></polyline>
+                </svg>
+                <span>LinkLayer.io</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="#overview">Architecture</a></li>
+                <li><a href="#functions">Functions</a></li>
+                <li><a href="#error-types">Errors</a></li>
+                <li><a href="#parity-section">Parity &amp; 2D</a></li>
+                <li><a href="#checksum-section">Checksum</a></li>
+                <li><a href="#crc-section">CRC Division</a></li>
+                <li><a href="#multiple-access">Multiple Access</a></li>
+                <li><a href="#docsis-section">DOCSIS</a></li>
+                <li><a href="#quiz-section">Quiz</a></li>
+            </ul>
+            <div>
+                <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" aria-label="Toggle theme">
+                    <span id="themeIcon">☀️</span>
+                    <span id="themeLabel">Light</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <header class="hero">
+        <h1>Inside the Link Layer</h1>
+        <p class="lead">
+            How computers turn raw signals into reliable frames, catch flipped bits when noise corrupts the data, and
+            take turns sharing cables and wireless airwaves.
+        </p>
+        <p class="lead">
+            <br>
+            Author: Atherva Srivastava
+        </p>
+    </header>
+
+    <div class="page-wrapper">
+
+        <!-- 1. ARCHITECTURE -->
+        <section id="overview" class="section-container">
+            <div class="section-header">
+                <h2 class="section-title">Why This Layer Matters: One Hop at a Time</h2>
+                <p class="section-desc">
+                    When you open a website, your data doesn't teleport directly to the server. It travels over multiple
+                    physical connections: your home Wi-Fi, your cable modem, long fiber optic runs, and router ports.
+                </p>
+            </div>
+
+            <div class="card">
+                <div class="grid-2">
+                    <div>
+                        <h3 style="color:var(--text-heading); font-size:1.15rem; margin-bottom: 0.6rem;">End-to-End vs.
+                            Hop-by-Hop</h3>
+                        <p style="margin-bottom: 0.85rem; font-size:0.92rem;">
+                            The <strong>Network Layer (Layer 3)</strong> plans the global trip from source to
+                            destination. But the <strong>Data Link Layer (Layer 2)</strong> cares about <em>one single
+                                hop at a time</em>.
+                        </p>
+                        <p style="margin-bottom: 0.85rem; font-size:0.92rem;">
+                            It takes packets from the network layer, packages them into frames, and converts them into
+                            physical signals bit-by-bit over the hardware. At the other end, it rebuilds the signals
+                            into frames and hands the packet back up.
+                        </p>
+                        <div class="callout">
+                            <strong>Simple Analogy:</strong> Think of the Network Layer like an itinerary from Mumbai to
+                            London (flight, taxi, train). The Data Link Layer is the vehicle carrying you across each
+                            individual stretch of road.
+                        </div>
+                    </div>
+
+                    <!-- Interactive Hop-by-Hop Visualizer -->
+                    <div>
+                        <div class="hop-diagram">
+                            <h4 style="color:var(--text-heading); font-size:0.95rem; margin-bottom:0.5rem;">Visualizing
+                                the Hops</h4>
+                            <div class="node-track">
+                                <div class="node-circle active" id="node-0">Host</div>
+                                <div class="node-circle" id="node-1">AP</div>
+                                <div class="node-circle" id="node-2">Router</div>
+                                <div class="node-circle" id="node-3">Server</div>
+                            </div>
+                            <div id="hopExplainer"
+                                style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-sm); padding:0.85rem; font-size:0.88rem; min-height:65px;">
+                                <strong>Hop 1 (Host to Wi-Fi AP):</strong> The packet is wrapped in an 802.11 Wi-Fi
+                                frame. The link layer handles radio noise and sends an ACK when received.
+                            </div>
+                            <div style="display:flex; gap:0.4rem; margin-top:0.85rem;">
+                                <button class="btn btn-sm" onclick="showHop(1)">Hop 1: Wi-Fi</button>
+                                <button class="btn btn-sm btn-outline" onclick="showHop(2)">Hop 2: Ethernet</button>
+                                <button class="btn btn-sm btn-outline" onclick="showHop(3)">Hop 3: Fiber</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- The Two Sub-Layers -->
+                <div style="margin-top: 2rem;">
+                    <h3 style="color:var(--text-heading); font-size:1.15rem; margin-bottom:1rem;">The Two Sub-Layers
+                    </h3>
+                    <div class="grid-2">
+                        <div class="sublayer-box">
+                            <h3>Logical Link Control (LLC)</h3>
+                            <p style="font-size:0.9rem; margin-bottom:0.5rem;">
+                                The upper half that talks directly to the Network Layer:
+                            </p>
+                            <ul style="font-size:0.88rem; padding-left:1.2rem; color:var(--text-main);">
+                                <li><strong>Protocol multiplexing:</strong> Identifies which protocol is inside (IPv4,
+                                    IPv6, ARP).</li>
+                                <li><strong>Flow control:</strong> Keeps a fast sender from flooding a slow receiver.
+                                </li>
+                                <li><strong>Error control:</strong> Manages retransmissions if packets get lost.</li>
+                            </ul>
+                        </div>
+
+                        <div class="sublayer-box mac-box">
+                            <h3>Media Access Control (MAC)</h3>
+                            <p style="font-size:0.9rem; margin-bottom:0.5rem;">
+                                The lower half that talks directly to the physical hardware:
+                            </p>
+                            <ul style="font-size:0.88rem; padding-left:1.2rem; color:var(--text-main);">
+                                <li><strong>Physical addressing:</strong> Uses unique 48-bit MAC addresses burned into
+                                    network cards.</li>
+                                <li><strong>Channel sharing:</strong> Decides who gets to speak when multiple devices
+                                    share a cable or frequency.</li>
+                                <li><strong>Frame synchronization:</strong> Adds start and stop flags so hardware knows
+                                    where frames begin.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. FUNCTIONS OF THE LINK LAYER -->
+        <section id="functions" class="section-container">
+            <div class="section-header">
+                <h2 class="section-title">Functions of the Link Layer</h2>
+                <p class="section-desc">
+                    The Data Link Layer carries out six core jobs to make communication reliable across local hardware.
+                </p>
+            </div>
+
+            <div class="card">
+                <div class="grid-3" style="margin-bottom:1.75rem;">
+                    <div class="info-card">
+                        <h4>1. Framing</h4>
+                        <p>Wraps the incoming network packet in a frame by adding a header (addresses) and trailer
+                            (error-checking code).</p>
+                    </div>
+
+                    <div class="info-card">
+                        <h4>2. Addressing</h4>
+                        <p>Assigns physical Layer-2 hardware addresses (MAC addresses) that uniquely identify each
+                            network card on the local link.</p>
+                    </div>
+
+                    <div class="info-card">
+                        <h4>3. Synchronization</h4>
+                        <p>Sender and receiver agree on clock timing so the receiver knows exactly where bits and frames
+                            start.</p>
+                    </div>
+
+                    <div class="info-card">
+                        <h4>4. Error Control</h4>
+                        <p>Detects bits that flipped due to noise and lets the receiver discard the frame or ask for a
+                            retransmission.</p>
+                    </div>
+
+                    <div class="info-card">
+                        <h4>5. Flow Control</h4>
+                        <p>Slows down a fast sender so it does not overwhelm the receiver's memory buffer.</p>
+                    </div>
+
+                    <div class="info-card">
+                        <h4>6. Multi-Access</h4>
+                        <p>Sets traffic rules so multiple computers sharing the same wire or Wi-Fi don't speak at once
+                            and collide.</p>
+                    </div>
+                </div>
+
+                <!-- Frame Anatomy Visualizer -->
+                <h3 style="color:var(--text-heading); font-size:1.15rem; margin-bottom:0.5rem;">Frame Anatomy (Ethernet
+                    Standard)</h3>
+                <p style="font-size:0.9rem; margin-bottom:1rem;">
+                    Click each part of the frame to see what it contains:
+                </p>
+
+                <div class="frame-visualizer">
+                    <div class="frame-pipeline">
+                        <div class="frame-block header active" onclick="inspectFrame('header', this)">
+                            <div class="fb-title">HEADER</div>
+                            <div class="fb-size">14 - 22 Bytes</div>
+                            <div class="fb-desc">MAC Addresses + Type</div>
+                        </div>
+                        <div class="frame-block payload" onclick="inspectFrame('payload', this)">
+                            <div class="fb-title">PAYLOAD (DATA)</div>
+                            <div class="fb-size">46 to 1500 Bytes</div>
+                            <div class="fb-desc">IP Packet from Layer 3</div>
+                        </div>
+                        <div class="frame-block trailer" onclick="inspectFrame('trailer', this)">
+                            <div class="fb-title">TRAILER</div>
+                            <div class="fb-size">4 Bytes (32 bits)</div>
+                            <div class="fb-desc">CRC Check (FCS)</div>
+                        </div>
+                    </div>
+
+                    <div class="frame-info-box" id="frameDetailBox">
+                        <div>
+                            <strong style="color:var(--primary);">Header Selected:</strong>
+                            <p style="margin-top:0.3rem; color:var(--text-main);">
+                                Contains the <strong>Destination MAC address</strong> (6 bytes), <strong>Source MAC
+                                    address</strong> (6 bytes), and the <strong>EtherType</strong> (2 bytes) showing if
+                                the payload is IPv4 or IPv6.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. HOW ERRORS HAPPEN -->
+        <section id="error-types" class="section-container">
+            <div class="section-header">
+                <h2 class="section-title">When Bits Flip: Three Types of Errors</h2>
+                <p class="section-desc">
+                    Electrical interference, heat, and loose wires can distort signals during transit. A <code>0</code>
+                    can flip to a <code>1</code>, or a <code>1</code> to a <code>0</code>.
+                </p>
+            </div>
+
+            <div class="card">
+                <div class="grid-3" style="margin-bottom:1.5rem;">
+                    <div class="info-card" style="cursor:pointer;" onclick="injectNoiseScenario('single')">
+                        <h4>Single-Bit Error</h4>
+                        <p>Only one bit in the entire data block flips. It is straightforward to detect with basic
+                            parity.</p>
+                        <span style="font-size:0.78rem; color:var(--primary); font-family:var(--mono-font);">Click to
+                            test</span>
+                    </div>
+
+                    <div class="info-card" style="cursor:pointer;" onclick="injectNoiseScenario('multi')">
+                        <h4>Multiple-Bit Error</h4>
+                        <p>Two or more separate bits flip in different places inside the message.</p>
+                        <span style="font-size:0.78rem; color:var(--secondary); font-family:var(--mono-font);">Click to
+                            test</span>
+                    </div>
+
+                    <div class="info-card" style="cursor:pointer;" onclick="injectNoiseScenario('burst')">
+                        <h4>Burst Error (Most Common)</h4>
+                        <p>A streak of consecutive bits get scrambled. This is the most common error in real channels
+                            because noise lasts longer than 1 bit.</p>
+                        <span style="font-size:0.78rem; color:var(--accent-cyan); font-family:var(--mono-font);">Click
+                            to test</span>
+                    </div>
+                </div>
+
+                <!-- Interactive Bit-Flip Test -->
+                <div
+                    style="background:var(--bg-card-subtle); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:1.25rem;">
+                    <div
+                        style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; flex-wrap:wrap; gap:0.5rem;">
+                        <h4 style="color:var(--text-heading); font-size:0.95rem;">Interactive Bit Flip Sandbox</h4>
+                        <span style="font-size:0.8rem; color:var(--text-muted);">Click any bit below to flip it
+                            manually:</span>
+                    </div>
+
+                    <div class="bit-stream-box" id="interactiveBitStream"></div>
+
+                    <div style="display:flex; gap:0.5rem; margin-top:1rem; flex-wrap:wrap; align-items:center;">
+                        <button class="btn btn-sm" onclick="injectNoiseScenario('single')">Flip 1 Bit</button>
+                        <button class="btn btn-sm" onclick="injectNoiseScenario('multi')">Flip 2 Bits</button>
+                        <button class="btn btn-sm" onclick="injectNoiseScenario('burst')">Flip 4 Consecutive Bits
+                            (Burst)</button>
+                        <button class="btn btn-sm btn-outline" onclick="resetBitStream()">Reset Bits</button>
+                        <span id="noiseStreamStatus"
+                            style="font-size:0.85rem; font-family:var(--mono-font); margin-left:auto; color:var(--success);">Stream
+                            is clean</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. SIMPLE PARITY -->
+        <section id="parity-section" class="section-container">
+            <div class="section-header">
+                <h2 class="section-title">1. Simple Parity Check</h2>
+                <p class="section-desc">
+                    The simplest way to check for errors: add one extra bit so the total number of 1s is always even.
+                </p>
+            </div>
+
+            <div class="card">
+                <div class="grid-2">
+                    <div>
+                        <h3 style="color:var(--text-heading); font-size:1.1rem; margin-bottom:0.6rem;">How It Works</h3>
+                        <p style="font-size:0.92rem; margin-bottom:0.75rem;">
+                            Say your data is <code
+                                style="font-family:var(--mono-font); color:var(--primary);">101010</code>:
+                        </p>
+                        <ul style="font-size:0.88rem; padding-left:1.2rem; margin-bottom:1rem; line-height:1.6;">
+                            <li>Count the 1s: there are <strong>3 ones (an odd number)</strong>.</li>
+                            <li>To make the count even, append a parity bit <strong>1</strong>.</li>
+                            <li>Send: <code style="font-family:var(--mono-font);">1010101</code> (now has 4 ones).</li>
+                        </ul>
+
+                        <div
+                            style="background:var(--bg-card-subtle); border:1px solid var(--border-color); border-radius:var(--radius-sm); padding:0.9rem; font-size:0.88rem;">
+                            <strong style="color:var(--success);">What it catches:</strong> Any single flipped bit or
+                            odd number of flipped bits.<br><br>
+                            <strong style="color:var(--danger);">The Blindspot:</strong> If <strong>two bits</strong>
+                            flip at once (e.g. <code>1010101</code> turns into <code>1111101</code>), the count of 1s is
+                            still even. The receiver thinks the data is clean and accepts corrupted data!
+                        </div>
+                    </div>
+
+                    <!-- Simulator -->
+                    <div>
+                        <div class="sim-panel" style="margin-top:0;">
+                            <h4 style="color:var(--text-heading); font-size:0.95rem; margin-bottom:0.75rem;">Try Parity
+                                Yourself</h4>
+                            <div class="form-row">
+                                <div class="input-group">
+                                    <label>Binary Data</label>
+                                    <input type="text" id="simpleParityInput" value="101010" maxlength="16">
+                                </div>
+                                <div class="input-group">
+                                    <label>Parity Mode</label>
+                                    <select id="parityMode">
+                                        <option value="even" selected>Even Parity</option>
+                                        <option value="odd">Odd Parity</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+                                <button class="btn btn-sm" onclick="calculateSimpleParity(0)">Send Clean</button>
+                                <button class="btn btn-sm" style="background:var(--warning); color:#000;"
+                                    onclick="calculateSimpleParity(1)">Corrupt 1 Bit</button>
+                                <button class="btn btn-sm" style="background:var(--danger);"
+                                    onclick="calculateSimpleParity(2)">Corrupt 2 Bits (Blindspot)</button>
+                            </div>
+
+                            <div class="result-box" id="simpleParityOutput">
+                                Click a button above to run the parity check.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. 2D PARITY -->
+        <section id="two-d-parity" class="section-container">
+            <div class="section-header">
+                <h2 class="section-title">2. Two-Dimensional Parity: Locating &amp; Fixing Errors</h2>
+                <p class="section-desc">
+                    Instead of a single line, arrange bits into a grid like a mini spreadsheet. Calculate parity for
+                    each row AND each column.
+                </p>
+            </div>
+
+            <div class="card">
+                <div class="grid-2">
+                    <div>
+                        <h3 style="color:var(--text-heading); font-size:1.1rem; margin-bottom:0.6rem;">Interactive 4×4
+                            Grid</h3>
+                        <p style="font-size:0.88rem; margin-bottom:0.85rem;">
+                            <strong>Click any cell</strong> to toggle its bit between <code>0</code> and <code>1</code>.
+                            Watch row and column parities update:
+                        </p>
+
+                        <table class="matrix-table" id="matrixGrid">
+                            <thead>
+                                <tr>
+                                    <th class="matrix-header"></th>
+                                    <th class="matrix-header">Col 0</th>
+                                    <th class="matrix-header">Col 1</th>
+                                    <th class="matrix-header">Col 2</th>
+                                    <th class="matrix-header">Col 3</th>
+                                    <th class="matrix-header" style="color:var(--secondary);">Row Par</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th class="matrix-header">Row 0</th>
+                                    <td class="matrix-cell" id="c-0-0" onclick="toggleMatrixCell(0,0)">1</td>
+                                    <td class="matrix-cell" id="c-0-1" onclick="toggleMatrixCell(0,1)">0</td>
+                                    <td class="matrix-cell" id="c-0-2" onclick="toggleMatrixCell(0,2)">1</td>
+                                    <td class="matrix-cell" id="c-0-3" onclick="toggleMatrixCell(0,3)">1</td>
+                                    <td class="matrix-parity" id="rp-0">1</td>
+                                </tr>
+                                <tr>
+                                    <th class="matrix-header">Row 1</th>
+                                    <td class="matrix-cell" id="c-1-0" onclick="toggleMatrixCell(1,0)">0</td>
+                                    <td class="matrix-cell" id="c-1-1" onclick="toggleMatrixCell(1,1)">1</td>
+                                    <td class="matrix-cell" id="c-1-2" onclick="toggleMatrixCell(1,2)">1</td>
+                                    <td class="matrix-cell" id="c-1-3" onclick="toggleMatrixCell(1,3)">1</td>
+                                    <td class="matrix-parity" id="rp-1">1</td>
+                                </tr>
+                                <tr>
+                                    <th class="matrix-header">Row 2</th>
+                                    <td class="matrix-cell" id="c-2-0" onclick="toggleMatrixCell(2,0)">1</td>
+                                    <td class="matrix-cell" id="c-2-1" onclick="toggleMatrixCell(2,1)">1</td>
+                                    <td class="matrix-cell" id="c-2-2" onclick="toggleMatrixCell(2,2)">0</td>
+                                    <td class="matrix-cell" id="c-2-3" onclick="toggleMatrixCell(2,3)">0</td>
+                                    <td class="matrix-parity" id="rp-2">0</td>
+                                </tr>
+                                <tr>
+                                    <th class="matrix-header">Row 3</th>
+                                    <td class="matrix-cell" id="c-3-0" onclick="toggleMatrixCell(3,0)">0</td>
+                                    <td class="matrix-cell" id="c-3-1" onclick="toggleMatrixCell(3,1)">0</td>
+                                    <td class="matrix-cell" id="c-3-2" onclick="toggleMatrixCell(3,2)">1</td>
+                                    <td class="matrix-cell" id="c-3-3" onclick="toggleMatrixCell(3,3)">0</td>
+                                    <td class="matrix-parity" id="rp-3">1</td>
+                                </tr>
+                                <tr>
+                                    <th class="matrix-header" style="color:var(--secondary);">Col Par</th>
+                                    <td class="matrix-parity" id="cp-0">0</td>
+                                    <td class="matrix-parity" id="cp-1">0</td>
+                                    <td class="matrix-parity" id="cp-2">1</td>
+                                    <td class="matrix-parity" id="cp-3">0</td>
+                                    <td class="matrix-parity" id="gp">1</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div
+                            style="display:flex; gap:0.4rem; justify-content:center; flex-wrap:wrap; margin-top:0.75rem;">
+                            <button class="btn btn-sm" onclick="corruptSingle2D()">Corrupt (Row 2, Col 1)</button>
+                            <button class="btn btn-sm btn-outline" onclick="autoCorrect2D()">Auto-Correct</button>
+                            <button class="btn btn-sm btn-outline" onclick="reset2DMatrix()">Reset</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 style="color:var(--text-heading); font-size:1.1rem; margin-bottom:0.6rem;">Status &amp;
+                            Diagnostics</h3>
+                        <div class="result-box" id="matrixDiagnosisBox" style="min-height: 160px;">
+                            Click any cell in the grid to inspect how row and column parities change.
+                        </div>
+
+                        <div style="margin-top:1.25rem;">
+                            <h4 style="color:var(--text-heading); font-size:0.92rem; margin-bottom:0.4rem;">Rules:</h4>
+                            <ul
+                                style="font-size:0.88rem; padding-left:1.2rem; color:var(--text-main); line-height:1.6;">
+                                <li><strong>1 Flipped Bit:</strong> Exactly 1 row and 1 column parity will fail. Where
+                                    they cross is the exact bad bit, so you can flip it back and correct it!</li>
+                                <li><strong>2 or 3 Bits:</strong> You can detect that an error happened, but you can't
+                                    be sure which coordinates to fix.</li>
+                                <li><strong>4-Bit Rectangle:</strong> If 4 bits arranged in a rectangle flip together,
+                                    parity checks don't change at all (blindspot).</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. CHECKSUM -->
+        <section id="checksum-section" class="section-container">
+            <div class="section-header">
+                <h2 class="section-title">3. Checksum: Adding Numbers with 1's Complement</h2>
+                <p class="section-desc">
+                    Used widely in internet protocols (IP, TCP, UDP). It slices your message into equal chunks, adds
+                    them like numbers, and flips every bit to make the checksum.
+                </p>
+            </div>
+
+            <div class="card">
+                <div class="grid-2">
+                    <div>
+                        <h3 style="color:var(--text-heading); font-size:1.1rem; margin-bottom:0.6rem;">How Checksum
+                            Works</h3>
+                        <p style="font-size:0.88rem; margin-bottom:0.6rem;"><strong>Sender Side:</strong></p>
+                        <ol style="font-size:0.88rem; padding-left:1.2rem; margin-bottom:1rem; line-height:1.6;">
+                            <li>Divide data into segments (e.g. 8 bits each).</li>
+                            <li>Add the segments together. If there is a carry bit on the end, wrap it around and add it
+                                to the total.</li>
+                            <li>Flip all the bits (bitwise NOT) to get the <strong>Checksum</strong>.</li>
+                            <li>Send the data along with this checksum.</li>
+                        </ol>
+
+                        <p style="font-size:0.88rem; margin-bottom:0.6rem;"><strong>Receiver Side:</strong></p>
+                        <ol style="font-size:0.88rem; padding-left:1.2rem; line-height:1.6;">
+                            <li>Add all received data segments PLUS the checksum together.</li>
+                            <li>Flip all the bits. If the result is <strong>all zeros</strong>, the frame arrived
+                                intact!</li>
+                        </ol>
+                    </div>
+
+                    <!-- Interactive Checksum Calculator -->
+                    <div>
+                        <div class="sim-panel" style="margin-top:0;">
+                            <h4 style="color:var(--text-heading); font-size:0.95rem; margin-bottom:0.75rem;">Interactive
+                                8-Bit Checksum</h4>
+                            <div class="form-row">
+                                <div class="input-group">
+                                    <label>Segment 1</label>
+                                    <input type="text" id="chkSeg1" value="10101001" maxlength="8">
+                                </div>
+                                <div class="input-group">
+                                    <label>Segment 2</label>
+                                    <input type="text" id="chkSeg2" value="00111100" maxlength="8">
+                                </div>
+                            </div>
+                            <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+                                <button class="btn btn-sm" onclick="computeChecksumDemo(false)">Send Clean</button>
+                                <button class="btn btn-sm" style="background:var(--danger);"
+                                    onclick="computeChecksumDemo(true)">Corrupt Bit &amp; Verify</button>
+                            </div>
+                            <div class="result-box" id="checksumResultBox">
+                                Click "Send Clean" to see the step-by-step addition and inversion.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 7. CRC MODULO-2 -->
+        <section id="crc-section" class="section-container">
+            <div class="section-header">
+                <h2 class="section-title">4. Cyclic Redundancy Check (CRC): Binary Division</h2>
+                <p class="section-desc">
+                    Unlike checksum which uses addition, CRC uses binary division. It is the gold standard used in
+                    Ethernet cables and Wi-Fi because it is incredible at catching burst errors.
+                </p>
+            </div>
+
+            <div class="card">
+                <div class="grid-2">
+                    <div>
+                        <h3 style="color:var(--text-heading); font-size:1.1rem; margin-bottom:0.6rem;">The 4-Step CRC
+                            Recipe</h3>
+                        <p style="font-size:0.88rem; margin-bottom:0.6rem;">
+                            Given data of length n and an agreed divisor (polynomial) of length k:
+                        </p>
+                        <ol style="font-size:0.88rem; padding-left:1.2rem; margin-bottom:1rem; line-height:1.65;">
+                            <li><strong>Step 1:</strong> Add (k-1) zeros to the end of the data.</li>
+                            <li><strong>Step 2:</strong> Divide using <strong>modulo-2 division</strong> (XOR instead of
+                                subtraction—no borrows!).</li>
+                            <li><strong>Step 3:</strong> The leftover remainder (k-1 bits) is the <strong>CRC check
+                                    code</strong>.</li>
+                            <li><strong>Step 4:</strong> Attach the CRC remainder to the original data and transmit.
+                            </li>
+                        </ol>
+
+                        <div class="callout">
+                            <strong>Class Example:</strong><br>
+                            Data: <code>1010000</code><br>
+                            Divisor (x^3 + 1): <code>1001</code> (4 bits, so append 3 zeros)<br>
+                            Divided with XOR to Remainder: <strong style="color:var(--primary);">011</strong><br>
+                            Codeword Sent: <code>1010000011</code><br>
+                            The receiver divides by <code>1001</code>. If remainder is 0, the frame is accepted!
+                        </div>
+                    </div>
+
+                    <!-- Division Visualizer -->
+                    <div>
+                        <div class="sim-panel" style="margin-top:0;">
+                            <h4 style="color:var(--text-heading); font-size:0.95rem; margin-bottom:0.75rem;">Interactive
+                                CRC Division</h4>
+                            <div class="form-row">
+                                <div class="input-group">
+                                    <label>Data</label>
+                                    <input type="text" id="crcDataInput" value="1010000" maxlength="14">
+                                </div>
+                                <div class="input-group">
+                                    <label>Divisor</label>
+                                    <input type="text" id="crcDivInput" value="1001" maxlength="6">
+                                </div>
+                            </div>
+                            <div style="display:flex; gap:0.4rem; flex-wrap:wrap; margin-bottom:0.75rem;">
+                                <button class="btn btn-sm" onclick="runCrcDivision(false)">Calculate CRC</button>
+                                <button class="btn btn-sm" style="background:var(--danger);"
+                                    onclick="runCrcDivision(true)">Corrupt Codeword</button>
+                                <button class="btn btn-sm btn-outline" onclick="loadCrcPreset('1010000', '1001')">Reset
+                                    Example</button>
+                            </div>
+
+                            <div class="modulo-div-step" id="crcTraceBox">Click "Calculate CRC" to view the XOR
+                                long-division steps.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Comparison Table -->
+                <div style="margin-top:2rem;">
+                    <h3 style="color:var(--text-heading); font-size:1.15rem; margin-bottom:0.75rem;">Comparison Table
+                    </h3>
+                    <div class="table-responsive">
+                        <table class="custom-table">
+                            <thead>
+                                <tr>
+                                    <th>Method</th>
+                                    <th>Extra Bits</th>
+                                    <th>Strength</th>
+                                    <th>Weakness</th>
+                                    <th>Where It's Used</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Simple Parity</strong></td>
+                                    <td>1 bit</td>
+                                    <td>Very fast; catches all single bit flips.</td>
+                                    <td>Misses all even numbers of bit flips.</td>
+                                    <td>Serial ports (RS-232), old RAM.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>2D Parity</strong></td>
+                                    <td>1 per row + 1 per col</td>
+                                    <td>Locates and corrects 1-bit errors; catches 2-3 bit errors.</td>
+                                    <td>Cannot fix 2 or more errors; misses 4-bit rectangles.</td>
+                                    <td>Block data, tape drives.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Checksum</strong></td>
+                                    <td>1 segment (8 or 16 bits)</td>
+                                    <td>Easy to calculate in software using simple addition.</td>
+                                    <td>Weak against burst errors.</td>
+                                    <td>Internet Protocols (IPv4, TCP, UDP).</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>CRC</strong></td>
+                                    <td>k-1 bits (FCS)</td>
+                                    <td>Best protection against burst errors; fast in hardware chips.</td>
+                                    <td>Detects only (must re-request corrupted frame).</td>
+                                    <td>Ethernet (CRC-32), Wi-Fi, SATA, USB.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 8. MULTIPLE ACCESS PROTOCOLS -->
+        <section id="multiple-access" class="section-container">
+            <div class="section-header">
+                <h2 class="section-title">Sharing the Wire: Multiple Access Protocols</h2>
+                <p class="section-desc">
+                    When multiple computers share a single cable or Wi-Fi channel, they cannot all talk at the same time
+                    or their signals smash together. That collision garbles the data. Multiple access protocols are the
+                    traffic rules that prevent or handle these collisions.
+                </p>
+            </div>
+
+            <div class="card">
+                <h3 style="color:var(--text-heading); font-size:1.15rem; margin-bottom:0.75rem;">The Three Families of
+                    Protocols</h3>
+                <div class="grid-3" style="margin-bottom:1.75rem;">
+                    <div class="info-card">
+                        <h4 style="color:var(--primary);">1. Random Access</h4>
+                        <p>No device has priority. Any device can transmit when the line looks free. Collisions can
+                            happen, so protocols define how to recover.</p>
+                        <span style="font-size:0.75rem; color:var(--text-muted); font-family:var(--mono-font);">ALOHA,
+                            CSMA, CSMA/CD, CSMA/CA</span>
+                    </div>
+
+                    <div class="info-card">
+                        <h4 style="color:var(--secondary);">2. Controlled Access</h4>
+                        <p>Devices take turns or ask for permission. Zero collisions occur because only one device is
+                            authorized to transmit at any instant.</p>
+                        <span
+                            style="font-size:0.75rem; color:var(--text-muted); font-family:var(--mono-font);">Reservation,
+                            Polling, Token Passing</span>
+                    </div>
+
+                    <div class="info-card">
+                        <h4 style="color:var(--accent-cyan);">3. Channelization</h4>
+                        <p>The total bandwidth is sliced up among stations by frequency (radio bands), time slots, or
+                            unique mathematical codes.</p>
+                        <span style="font-size:0.75rem; color:var(--text-muted); font-family:var(--mono-font);">FDMA,
+                            TDMA, CDMA</span>
+                    </div>
+                </div>
+
+                <!-- Random Access Deep Dive -->
+                <h3 style="color:var(--text-heading); font-size:1.15rem; margin-bottom:0.75rem;">Random Access Deep Dive
+                </h3>
+
+                <div class="grid-2" style="margin-bottom:1.5rem;">
+                    <div
+                        style="background:var(--bg-card-subtle); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:1.25rem;">
+                        <h4 style="color:var(--text-heading); font-size:1rem; margin-bottom:0.4rem;">Pure ALOHA (Max
+                            Efficiency: ~18%)</h4>
+                        <p style="font-size:0.88rem; margin-bottom:0.5rem;">
+                            A station transmits whenever it has data ready. If two stations transmit around the same
+                            time, they collide, wait a random back-off time, and try again.
+                        </p>
+                        <p style="font-size:0.82rem; color:var(--text-muted);">
+                            <strong>Vulnerable Time:</strong> 2*FrameTime. Because transmissions can
+                            overlap at any instant, over 80% of bandwidth is wasted in collisions.
+                        </p>
+                    </div>
+
+                    <div
+                        style="background:var(--bg-card-subtle); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:1.25rem;">
+                        <h4 style="color:var(--text-heading); font-size:1rem; margin-bottom:0.4rem;">Slotted ALOHA (Max
+                            Efficiency: ~37%)</h4>
+                        <p style="font-size:0.88rem; margin-bottom:0.5rem;">
+                            Time is divided into slots equal to one frame length. Stations are allowed to transmit
+                            <em>only at the beginning of a slot</em>.
+                        </p>
+                        <p style="font-size:0.82rem; color:var(--text-muted);">
+                            <strong>Vulnerable Time:</strong> Cut in half to 1*FrameTime, which doubles
+                            the maximum channel efficiency!
+                        </p>
+                    </div>
+                </div>
+
+                <!-- CSMA & Propagation Delay -->
+                <div
+                    style="background:var(--bg-card-subtle); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:1.5rem; margin-bottom:1.75rem;">
+                    <h4 style="color:var(--text-heading); font-size:1.05rem; margin-bottom:0.4rem;">CSMA: "Listen Before
+                        You Speak"</h4>
+                    <p style="font-size:0.9rem; margin-bottom:0.75rem;">
+                        Carrier Sense Multiple Access adds a simple habit: check the line first. If it's busy, wait. If
+                        it's idle, send.
+                    </p>
+                    <p style="font-size:0.88rem; margin-bottom:0.85rem;">
+                        <strong>Why do collisions still happen?</strong> Because of <strong>propagation delay</strong>:
+                        electrical signals take time to travel down the physical wire. Station A might start sending,
+                        but before its signal reaches Station B, Station B senses an empty wire and starts transmitting
+                        too!
+                    </p>
+
+                    <!-- Interactive Wire Simulation -->
+                    <div
+                        style="background:var(--bg-body); border:1px solid var(--border-color); border-radius:var(--radius-sm); padding:1.25rem;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span style="font-size:0.85rem; font-weight:600; color:var(--text-heading);">Cable
+                                Medium</span>
+                            <span id="csmaStatusText"
+                                style="font-size:0.82rem; font-family:var(--mono-font); color:var(--text-muted);">Wire
+                                is Idle</span>
+                        </div>
+
+                        <div class="wire-channel" id="wireChannel">
+                            <div>
+                                <div class="station-badge">Station A</div>
+                            </div>
+                            <div id="packetA" class="packet-token" style="display:none; left:60px;">Packet A ➔</div>
+                            <div id="packetB" class="packet-token" style="display:none; right:60px;"> Packet B</div>
+                            <div>
+                                <div class="station-badge">Station B</div>
+                            </div>
+                        </div>
+
+                        <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+                            <button class="btn btn-sm" onclick="sendStationA()">Station A Sends</button>
+                            <button class="btn btn-sm" onclick="sendStationB()">Station B Sends</button>
+                            <button class="btn btn-sm" style="background:var(--danger);"
+                                onclick="simulateCollisionScenario()">Simulate Propagation Collision</button>
+                            <button class="btn btn-sm btn-outline" onclick="resetWire()">Reset Cable</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CSMA Modes -->
+                <div style="margin-bottom:1.75rem;">
+                    <h4 style="color:var(--text-heading); font-size:1.05rem; margin-bottom:0.4rem;">CSMA Access Modes
+                    </h4>
+                    <p style="font-size:0.88rem; margin-bottom:0.5rem;">What should a device do when it finds the
+                        channel busy?</p>
+
+                    <div class="tab-group">
+                        <button class="tab-btn active" onclick="showPersistence('1-p', this)">1-Persistent</button>
+                        <button class="tab-btn" onclick="showPersistence('non-p', this)">Non-Persistent</button>
+                        <button class="tab-btn" onclick="showPersistence('p-p', this)">p-Persistent</button>
+                        <button class="tab-btn" onclick="showPersistence('o-p', this)">O-Persistent</button>
+                    </div>
+
+                    <div id="persistenceDetailBox"
+                        style="background:var(--bg-card-subtle); border:1px solid var(--border-color); border-radius:var(--radius-sm); padding:1rem; font-size:0.9rem;">
+                        <strong style="color:var(--primary);">1-Persistent Mode:</strong> The device keeps listening
+                        continuously. The very instant the channel goes idle, it transmits immediately.
+                        <em>Tradeoff:</em> No idle time wasted, but high risk of collision if multiple stations were
+                        waiting for the channel to clear!
+                    </div>
+                </div>
+
+                <!-- CSMA/CD vs CSMA/CA -->
+                <div class="grid-2" style="margin-bottom:1.75rem;">
+                    <div
+                        style="background:var(--bg-card-subtle); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:1.25rem;">
+                        <h4 style="color:var(--text-heading); font-size:1rem; margin-bottom:0.4rem;">CSMA/CD (Collision
+                            Detection)</h4>
+                        <p style="font-size:0.88rem; margin-bottom:0.5rem;">
+                            Used in classic wired Ethernet. The network card listens while it transmits.
+                        </p>
+                        <ul style="font-size:0.85rem; padding-left:1.2rem; color:var(--text-main); line-height:1.55;">
+                            <li>If voltage doubles on the wire, a collision is detected.</li>
+                            <li>The station immediately stops transmitting.</li>
+                            <li>It sends a quick <strong>Jam Signal</strong> to alert all devices.</li>
+                            <li>Waits a random back-off time before trying again.</li>
+                        </ul>
+                    </div>
+
+                    <div
+                        style="background:var(--bg-card-subtle); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:1.25rem;">
+                        <h4 style="color:var(--text-heading); font-size:1rem; margin-bottom:0.4rem;">CSMA/CA (Collision
+                            Avoidance)</h4>
+                        <p style="font-size:0.88rem; margin-bottom:0.5rem;">
+                            Used in Wi-Fi. Radios cannot listen while transmitting because their outgoing signal drowns
+                            out reception.
+                        </p>
+                        <ul style="font-size:0.85rem; padding-left:1.2rem; color:var(--text-main); line-height:1.55;">
+                            <li>Focuses on avoiding collisions before they occur.</li>
+                            <li>Waits an Inter-Frame Space (IFS) and counts down a random back-off timer.</li>
+                            <li>Can send <strong>RTS (Request to Send)</strong> and wait for <strong>CTS (Clear to
+                                    Send)</strong>.</li>
+                            <li>Requires an explicit <strong>ACK</strong> from the receiver to confirm delivery.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Controlled Access & Channelization -->
+                <div class="grid-2">
+                    <div>
+                        <h4 style="color:var(--text-heading); font-size:1rem; margin-bottom:0.5rem;">Controlled Access
+                            (Collision-Free)</h4>
+                        <div style="display:flex; flex-direction:column; gap:0.5rem; font-size:0.85rem;">
+                            <div
+                                style="background:var(--bg-card-subtle); border:1px solid var(--border-color); padding:0.75rem; border-radius:4px;">
+                                <strong>Reservation:</strong> Stations announce in mini-slots beforehand that they have
+                                data, then take turns transmitting in order.
+                            </div>
+                            <div
+                                style="background:var(--bg-card-subtle); border:1px solid var(--border-color); padding:0.75rem; border-radius:4px;">
+                                <strong>Polling:</strong> A primary master station asks each secondary station
+                                one-by-one: "Do you have data to send?"
+                            </div>
+                            <div
+                                style="background:var(--bg-card-subtle); border:1px solid var(--border-color); padding:0.75rem; border-radius:4px;">
+                                <strong>Token Passing:</strong> A special token circulates around a logical ring. Only
+                                the computer holding the token is allowed to talk.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 style="color:var(--text-heading); font-size:1rem; margin-bottom:0.5rem;">Channelization
+                            (Dividing the Spectrum)</h4>
+                        <div style="display:flex; flex-direction:column; gap:0.5rem; font-size:0.85rem;">
+                            <div
+                                style="background:var(--bg-card-subtle); border:1px solid var(--border-color); padding:0.75rem; border-radius:4px;">
+                                <strong>FDMA (Frequency Division):</strong> Splits the total bandwidth into separate
+                                radio frequency bands. Each station gets its own band.
+                            </div>
+                            <div
+                                style="background:var(--bg-card-subtle); border:1px solid var(--border-color); padding:0.75rem; border-radius:4px;">
+                                <strong>TDMA (Time Division):</strong> Everyone shares the same frequency, but time is
+                                sliced into repeating slots. Each station speaks in its slot.
+                            </div>
+                            <div
+                                style="background:var(--bg-card-subtle); border:1px solid var(--border-color); padding:0.75rem; border-radius:4px;">
+                                <strong>CDMA (Code Division):</strong> Everyone transmits at the same time on the same
+                                frequency. Each station is assigned a unique code so signals don't interfere.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 9. CASE STUDY: DOCSIS -->
+        <section id="docsis-section" class="section-container">
+            <div class="section-header">
+                <h2 class="section-title">Case Study: DOCSIS (Data Over Cable TV)</h2>
+                <p class="section-desc">
+                    Cable TV companies already had coaxial cables running into millions of homes. In 1997, DOCSIS was
+                    created so they could provide high-speed internet through existing TV cables without having to dig
+                    up streets.
+                </p>
+            </div>
+
+            <div class="card">
+                <p style="font-size:0.92rem; margin-bottom:1.25rem;">
+                    Because all homes in a neighborhood share the same physical cable, the MAC layer scheduling rules in
+                    DOCSIS are essential to keep traffic moving smoothly.
+                </p>
+
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-content">
+                            <span class="year-tag">1997 / 1999</span>
+                            <strong style="color:var(--text-heading);">DOCSIS 1.0 &amp; 1.1</strong>
+                            <p style="margin-top:0.3rem; font-size:0.85rem; color:var(--text-main);">
+                                40 Mbps download / 10 Mbps upload. DOCSIS 1.1 added quality-of-service (QoS) rules to
+                                make telephone calls over cable (VoIP) possible.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-content">
+                            <span class="year-tag">2002</span>
+                            <strong style="color:var(--text-heading);">DOCSIS 2.0</strong>
+                            <p style="margin-top:0.3rem; font-size:0.85rem; color:var(--text-main);">
+                                Tripled upload speeds to 30 Mbps by opening up wider upstream bands and using better
+                                modulation to resist noise.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-content">
+                            <span class="year-tag">2006</span>
+                            <strong style="color:var(--text-heading);">DOCSIS 3.0 (Channel Bonding)</strong>
+                            <p style="margin-top:0.3rem; font-size:0.85rem; color:var(--text-main);">
+                                Introduced <strong>Channel Bonding</strong>: combining multiple cable channels together
+                                like lanes on a highway. Achieved 340+ Mbps downloads and added IPv6 support.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-content">
+                            <span class="year-tag">~2020</span>
+                            <strong style="color:var(--text-heading);">DOCSIS 4.0</strong>
+                            <p style="margin-top:0.3rem; font-size:0.85rem; color:var(--text-main);">
+                                Supports speeds up to 10 Gbps download and 6 Gbps upload, bringing multi-gigabit speeds
+                                to regular coaxial cables.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 10. QUIZ -->
+        <section id="quiz-section" class="section-container">
+            <div class="section-header">
+                <h2 class="section-title">Quick Concept Check</h2>
+                <p class="section-desc">Test your understanding with 5 quick questions.</p>
+            </div>
+
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
+                    <h3 style="color:var(--text-heading); font-size:1.15rem;">Question <span id="quizIndex">1</span> of
+                        5</h3>
+                    <div style="font-family:var(--mono-font); font-size:0.85rem; color:var(--primary);">
+                        Score: <span id="quizScore">0</span> / 5
+                    </div>
+                </div>
+
+                <div id="quizContainer">
+                    <div class="quiz-question" id="quizQuestionText">Loading question...</div>
+                    <div class="quiz-options" id="quizOptionsContainer"></div>
+                    <div class="quiz-feedback" id="quizFeedbackBox"></div>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; margin-top:1.25rem;">
+                    <button class="btn" id="nextQuizBtn" style="display:none;" onclick="loadNextQuiz()">Next Question
+                        ➔</button>
+                    <button class="btn btn-outline" id="restartQuizBtn" style="display:none;"
+                        onclick="restartQuiz()">Restart Quiz</button>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <ul class="footer-links">
+            <li><a href="#overview">Architecture</a></li>
+            <li><a href="#functions">Functions</a></li>
+            <li><a href="#error-types">Errors</a></li>
+            <li><a href="#two-d-parity">2D Parity</a></li>
+            <li><a href="#checksum-section">Checksum</a></li>
+            <li><a href="#crc-section">CRC Division</a></li>
+            <li><a href="#multiple-access">Multiple Access</a></li>
+            <li><a href="#docsis-section">DOCSIS</a></li>
+            <li><a href="#quiz-section">Quiz</a></li>
+        </ul>
+        <p>Inside the Link Layer · Interactive Computer Networks Guide</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // Reading Progress
+        window.addEventListener('scroll', () => {
+            const winScroll = document.documentElement.scrollTop || document.body.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.getElementById('readingProgress').style.width = scrolled + '%';
+        });
+
+        // Theme Toggle
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            document.getElementById('themeIcon').textContent = newTheme === 'dark' ? '☀️' : '🌙';
+            document.getElementById('themeLabel').textContent = newTheme === 'dark' ? 'Light' : 'Dark';
+        }
+
+        // Section 1: Hops
+        const hopData = {
+            1: "<strong>Hop 1 (Host to Wi-Fi AP):</strong> The packet is wrapped in an 802.11 Wi-Fi frame. The link layer handles radio noise and sends an ACK when received.",
+            2: "<strong>Hop 2 (AP to Router):</strong> The Wi-Fi frame is removed and the packet is re-packaged into an Ethernet frame traveling over twisted-pair copper at 1 Gbps.",
+            3: "<strong>Hop 3 (Router to Server):</strong> Packed into an optical fiber frame with CRC checks to make sure the data stays intact over long physical distances."
+        };
+        function showHop(index) {
+            document.getElementById('hopExplainer').innerHTML = hopData[index];
+            for (let i = 0; i < 4; i++) {
+                const node = document.getElementById(`node-${i}`);
+                if (i <= index) {
+                    node.classList.add('active');
+                } else {
+                    node.classList.remove('active');
+                }
+            }
+        }
+
+        // Section 2: Frame Anatomy
+        const frameDetails = {
+            header: "<strong>Header:</strong> Contains the <strong>Destination MAC address</strong> (6 bytes), <strong>Source MAC address</strong> (6 bytes), and the <strong>EtherType</strong> (2 bytes) showing if the payload is IPv4 or IPv6.",
+            payload: "<strong>Payload:</strong> The actual data packet from the Network Layer. Must be between 46 and 1,500 bytes. If it's too short, padding bits are added to make sure it meets the minimum length.",
+            trailer: "<strong>Trailer:</strong> Contains the 4-byte (32-bit) <strong>CRC Check (Frame Check Sequence)</strong>. If even 1 bit gets damaged on the wire, the CRC check fails and the receiver throws the frame away."
+        };
+        function inspectFrame(part, el) {
+            document.querySelectorAll('.frame-block').forEach(b => b.classList.remove('active'));
+            if (el) el.classList.add('active');
+            document.getElementById('frameDetailBox').innerHTML = `<div>${frameDetails[part]}</div>`;
+        }
+
+        // Section 3: Bit Stream
+        let currentBits = "1011001011010100".split("");
+        function renderBitStream() {
+            const container = document.getElementById('interactiveBitStream');
+            container.innerHTML = "";
+            currentBits.forEach((b, idx) => {
+                const cell = document.createElement('div');
+                cell.className = "bit-cell";
+                cell.id = `bit-${idx}`;
+                cell.textContent = b;
+                cell.onclick = () => toggleManualBit(idx);
+                container.appendChild(cell);
+            });
+        }
+        function toggleManualBit(idx) {
+            currentBits[idx] = currentBits[idx] === "1" ? "0" : "1";
+            renderBitStream();
+            const cell = document.getElementById(`bit-${idx}`);
+            if (cell) cell.classList.add('flipped');
+            document.getElementById('noiseStreamStatus').textContent = `Bit at index ${idx} flipped manually!`;
+            document.getElementById('noiseStreamStatus').style.color = "var(--warning)";
+        }
+        function resetBitStream() {
+            currentBits = "1011001011010100".split("");
+            renderBitStream();
+            document.getElementById('noiseStreamStatus').textContent = "Stream is clean";
+            document.getElementById('noiseStreamStatus').style.color = "var(--success)";
+        }
+        function injectNoiseScenario(type) {
+            resetBitStream();
+            if (type === 'single') {
+                currentBits[4] = currentBits[4] === "1" ? "0" : "1";
+                renderBitStream();
+                document.getElementById('bit-4').classList.add('flipped');
+                document.getElementById('noiseStreamStatus').textContent = "1 bit flipped at position 4!";
+                document.getElementById('noiseStreamStatus').style.color = "var(--danger)";
+            } else if (type === 'multi') {
+                currentBits[2] = currentBits[2] === "1" ? "0" : "1";
+                currentBits[10] = currentBits[10] === "1" ? "0" : "1";
+                renderBitStream();
+                document.getElementById('bit-2').classList.add('flipped');
+                document.getElementById('bit-10').classList.add('flipped');
+                document.getElementById('noiseStreamStatus').textContent = "2 separate bits flipped (positions 2 and 10)!";
+                document.getElementById('noiseStreamStatus').style.color = "var(--secondary)";
+            } else if (type === 'burst') {
+                for (let i = 6; i <= 9; i++) {
+                    currentBits[i] = currentBits[i] === "1" ? "0" : "1";
+                }
+                renderBitStream();
+                for (let i = 6; i <= 9; i++) {
+                    document.getElementById(`bit-${i}`).classList.add('flipped');
+                }
+                document.getElementById('noiseStreamStatus').textContent = "Burst error: 4 consecutive bits flipped (positions 6-9)!";
+                document.getElementById('noiseStreamStatus').style.color = "var(--accent-cyan)";
+            }
+        }
+        renderBitStream();
+
+        // Section 4: Parity
+        function calculateSimpleParity(noiseBits) {
+            const val = document.getElementById('simpleParityInput').value.trim();
+            const mode = document.getElementById('parityMode').value;
+            const output = document.getElementById('simpleParityOutput');
+
+            if (!/^[01]+$/.test(val)) {
+                output.innerHTML = "<span style='color:var(--danger);'>Please enter only binary 1s and 0s.</span>";
+                return;
+            }
+
+            const onesCount = (val.match(/1/g) || []).length;
+            let parityBit = (mode === 'even') ? (onesCount % 2 === 0 ? 0 : 1) : (onesCount % 2 === 0 ? 1 : 0);
+            const transmitted = val + parityBit;
+            let receivedArr = transmitted.split('');
+
+            if (noiseBits === 1) {
+                receivedArr[1] = receivedArr[1] === '1' ? '0' : '1';
+            } else if (noiseBits === 2) {
+                receivedArr[0] = receivedArr[0] === '1' ? '0' : '1';
+                receivedArr[1] = receivedArr[1] === '1' ? '0' : '1';
+            }
+
+            const received = receivedArr.join('');
+            const recvOnes = (received.match(/1/g) || []).length;
+            const passed = (mode === 'even') ? (recvOnes % 2 === 0) : (recvOnes % 2 !== 0);
+
+            let html = `Data: <code>${val}</code> (Count of 1s: ${onesCount})<br>`;
+            html += `Attached Parity Bit: <strong style="color:var(--primary);">${parityBit}</strong><br>`;
+            html += `Transmitted Codeword: <code>${transmitted}</code><br>`;
+            html += `Received Frame: <code style="color:${noiseBits > 0 ? 'var(--warning)' : 'inherit'};">${received}</code><br><br>`;
+
+            if (noiseBits === 0) {
+                html += `<span style="color:var(--success); font-weight:600;">✓ Parity Check Passed: Clean frame accepted.</span>`;
+            } else if (noiseBits === 1) {
+                html += `<span style="color:var(--danger); font-weight:600;">✗ Parity Check Failed! Single flipped bit caught. Frame discarded.</span>`;
+            } else if (noiseBits === 2) {
+                html += `<span style="color:var(--danger); font-weight:600;">⚠️ Blindspot Detected!</span><br>`;
+                html += `<span style="color:var(--warning);">Two bits flipped, but the count of 1s is still even. The receiver was fooled and accepted bad data!</span>`;
+            }
+
+            output.innerHTML = html;
+        }
+
+        // Section 5: 2D Parity
+        const matrixData = [
+            [1, 0, 1, 1],
+            [0, 1, 1, 1],
+            [1, 1, 0, 0],
+            [0, 0, 1, 0]
+        ];
+        function evaluate2DMatrix() {
+            let rowParities = [];
+            let colParities = [0, 0, 0, 0];
+            let failingRows = [];
+            let failingCols = [];
+
+            for (let r = 0; r < 4; r++) {
+                let rowOnes = 0;
+                for (let c = 0; c < 4; c++) {
+                    if (matrixData[r][c] === 1) {
+                        rowOnes++;
+                        colParities[c] = (colParities[c] + 1) % 2;
+                    }
+                }
+                const rp = rowOnes % 2;
+                rowParities.push(rp);
+                document.getElementById(`rp-${r}`).textContent = rp;
+            }
+
+            for (let c = 0; c < 4; c++) {
+                document.getElementById(`cp-${c}`).textContent = colParities[c];
+            }
+
+            const cleanRow = [1, 1, 0, 1];
+            const cleanCol = [0, 0, 1, 0];
+
+            for (let r = 0; r < 4; r++) {
+                const rpCell = document.getElementById(`rp-${r}`);
+                if (rowParities[r] !== cleanRow[r]) {
+                    rpCell.classList.add('parity-error');
+                    failingRows.push(r);
+                } else {
+                    rpCell.classList.remove('parity-error');
+                }
+            }
+
+            for (let c = 0; c < 4; c++) {
+                const cpCell = document.getElementById(`cp-${c}`);
+                if (colParities[c] !== cleanCol[c]) {
+                    cpCell.classList.add('parity-error');
+                    failingCols.push(c);
+                } else {
+                    cpCell.classList.remove('parity-error');
+                }
+            }
+
+            const initialClean = [
+                [1, 0, 1, 1],
+                [0, 1, 1, 1],
+                [1, 1, 0, 0],
+                [0, 0, 1, 0]
+            ];
+            for (let r = 0; r < 4; r++) {
+                for (let c = 0; c < 4; c++) {
+                    const el = document.getElementById(`c-${r}-${c}`);
+                    el.textContent = matrixData[r][c];
+                    if (matrixData[r][c] !== initialClean[r][c]) {
+                        el.classList.add('corrupted');
+                    } else {
+                        el.classList.remove('corrupted');
+                    }
+                }
+            }
+
+            const diagBox = document.getElementById('matrixDiagnosisBox');
+            if (failingRows.length === 0 && failingCols.length === 0) {
+                diagBox.innerHTML = "<span style='color:var(--success); font-weight:600;'>✓ All checks pass!</span><br>Row and column parities are completely consistent.";
+            } else if (failingRows.length === 1 && failingCols.length === 1) {
+                const r = failingRows[0];
+                const c = failingCols[0];
+                diagBox.innerHTML = `
+                    <span style='color:var(--danger); font-weight:600;'>Single Bit Error Found!</span><br>
+                    Row ${r} parity failed and Column ${c} parity failed.<br>
+                    <strong>Location:</strong> Row ${r}, Column ${c}.<br>
+                    <span style='color:var(--accent-cyan);'>Because we know the exact cell, we can fix it! Click "Auto-Correct" to repair it.</span>
+                `;
+            } else {
+                diagBox.innerHTML = `
+                    <span style='color:var(--warning); font-weight:600;'>Multiple Parity Failures:</span><br>
+                    Failing Rows: [${failingRows.join(', ')}]<br>
+                    Failing Cols: [${failingCols.join(', ')}]<br>
+                    Errors detected, but multiple bits make it impossible to correct safely without retransmitting.
+                `;
+            }
+        }
+
+        function toggleMatrixCell(r, c) {
+            matrixData[r][c] = matrixData[r][c] === 1 ? 0 : 1;
+            evaluate2DMatrix();
+        }
+
+        function corruptSingle2D() {
+            matrixData[2][1] = matrixData[2][1] === 1 ? 0 : 1;
+            evaluate2DMatrix();
+        }
+
+        function autoCorrect2D() {
+            matrixData[0] = [1, 0, 1, 1];
+            matrixData[1] = [0, 1, 1, 1];
+            matrixData[2] = [1, 1, 0, 0];
+            matrixData[3] = [0, 0, 1, 0];
+            evaluate2DMatrix();
+        }
+
+        function reset2DMatrix() {
+            autoCorrect2D();
+        }
+        evaluate2DMatrix();
+
+        // Section 6: Checksum
+        function computeChecksumDemo(corrupt) {
+            let seg1 = document.getElementById('chkSeg1').value.trim();
+            let seg2 = document.getElementById('chkSeg2').value.trim();
+            const out = document.getElementById('checksumResultBox');
+
+            if (!/^[01]{8}$/.test(seg1) || !/^[01]{8}$/.test(seg2)) {
+                out.innerHTML = "<span style='color:var(--danger);'>Please enter two 8-bit binary strings (e.g. 10101001).</span>";
+                return;
+            }
+
+            const num1 = parseInt(seg1, 2);
+            const num2 = parseInt(seg2, 2);
+            let sum = num1 + num2;
+            let carry = 0;
+            let wrappedSum = sum;
+            if (sum > 255) {
+                carry = 1;
+                wrappedSum = (sum & 0xFF) + carry;
+            }
+
+            const checksumVal = (~wrappedSum) & 0xFF;
+            const checksumBin = checksumVal.toString(2).padStart(8, '0');
+
+            let rcvSeg1 = seg1;
+            if (corrupt) {
+                rcvSeg1 = seg1.slice(0, 7) + (seg1[7] === '1' ? '0' : '1');
+            }
+
+            let rcvSum = parseInt(rcvSeg1, 2) + num2 + checksumVal;
+            while (rcvSum > 255) {
+                rcvSum = (rcvSum & 0xFF) + (rcvSum >> 8);
+            }
+            const rcvComplement = (~rcvSum) & 0xFF;
+
+            let html = `<strong>Sender:</strong><br>`;
+            html += `Segment 1: <code>${seg1}</code><br>`;
+            html += `Segment 2: <code>${seg2}</code><br>`;
+            html += `Sum: <code>${wrappedSum.toString(2).padStart(8, '0')}</code> ${carry ? '(carry bit wrapped around)' : ''}<br>`;
+            html += `Checksum (bits flipped): <strong style="color:var(--accent-cyan); font-family:var(--mono-font);">${checksumBin}</strong><br><br>`;
+
+            html += `<strong>Receiver:</strong><br>`;
+            html += `Received Segment 1: <code style="color:${corrupt ? 'var(--danger)' : 'inherit'};">${rcvSeg1}</code><br>`;
+            html += `Total Sum (Data + Checksum): <code>${rcvSum.toString(2).padStart(8, '0')}</code><br>`;
+            html += `After Inverting All Bits: <code>${rcvComplement.toString(2).padStart(8, '0')}</code><br><br>`;
+
+            if (rcvComplement === 0) {
+                html += `<span style="color:var(--success); font-weight:600;">✓ Result is all zeros. Frame is clean and accepted!</span>`;
+            } else {
+                html += `<span style="color:var(--danger); font-weight:600;">✗ Result is not zero. Corrupted frame discarded!</span>`;
+            }
+
+            out.innerHTML = html;
+        }
+
+        // Section 7: CRC
+        function xorStrings(a, b) {
+            let res = "";
+            for (let i = 1; i < b.length; i++) {
+                res += (a[i] === b[i]) ? "0" : "1";
+            }
+            return res;
+        }
+
+        function modulo2Div(dividend, divisor) {
+            let pick = divisor.length;
+            let tmp = dividend.slice(0, pick);
+            let trace = `Data with appended zeros: ${dividend}\nDivisor:                 ${divisor}\n-----------------------------------\n`;
+
+            while (pick < dividend.length) {
+                if (tmp[0] === '1') {
+                    const next = xorStrings(divisor, tmp) + dividend[pick];
+                    trace += `XOR: ${tmp} ➔ ${next}\n`;
+                    tmp = next;
+                } else {
+                    const zeroDiv = "0".repeat(divisor.length);
+                    const next = xorStrings(zeroDiv, tmp) + dividend[pick];
+                    trace += `XOR: ${tmp} ➔ ${next}\n`;
+                    tmp = next;
+                }
+                pick++;
+            }
+
+            if (tmp[0] === '1') {
+                tmp = xorStrings(divisor, tmp);
+            } else {
+                tmp = xorStrings("0".repeat(divisor.length), tmp);
+            }
+
+            trace += `-----------------------------------\nRemainder (CRC Code):    ${tmp}\n`;
+            return { remainder: tmp, trace: trace };
+        }
+
+        function runCrcDivision(corrupt) {
+            const data = document.getElementById('crcDataInput').value.trim();
+            const div = document.getElementById('crcDivInput').value.trim();
+            const traceBox = document.getElementById('crcTraceBox');
+
+            if (!/^[01]+$/.test(data) || !/^[01]+$/.test(div) || div[0] !== '1') {
+                traceBox.textContent = "Please enter valid binary strings. Divisor must start with 1.";
+                return;
+            }
+
+            const k = div.length;
+            const augmented = data + "0".repeat(k - 1);
+            const { remainder, trace } = modulo2Div(augmented, div);
+            let codeword = data + remainder;
+
+            let log = `--- SENDER DIVISION ---\nData:     ${data}\nDivisor:  ${div}\n\n${trace}\nTransmitted Codeword: ${codeword}\n\n`;
+
+            if (corrupt) {
+                let codeArr = codeword.split('');
+                codeArr[codeArr.length - 2] = codeArr[codeArr.length - 2] === '1' ? '0' : '1';
+                codeword = codeArr.join('');
+                log += `⚠️ NOISE: A bit flipped in transit! Received: ${codeword}\n\n`;
+            }
+
+            log += `--- RECEIVER CHECK ---\nDividing received codeword by ${div}:\n`;
+            const check = modulo2Div(codeword, div);
+            log += check.trace;
+
+            const isZero = /^0+$/.test(check.remainder);
+            if (isZero) {
+                log += `\n>> Result: Remainder is 0. Frame is completely error-free!`;
+            } else {
+                log += `\n>> Result: Non-zero remainder (${check.remainder}). Frame is damaged and rejected.`;
+            }
+
+            traceBox.textContent = log;
+        }
+
+        function loadCrcPreset(d, p) {
+            document.getElementById('crcDataInput').value = d;
+            document.getElementById('crcDivInput').value = p;
+            runCrcDivision(false);
+        }
+
+        // Section 8: CSMA Simulation
+        let wireActiveA = false;
+        let wireActiveB = false;
+
+        function updateWireStatus(msg, isColl) {
+            const el = document.getElementById('csmaStatusText');
+            el.textContent = msg;
+            el.style.color = isColl ? "var(--danger)" : "var(--primary)";
+        }
+
+        function sendStationA() {
+            const pA = document.getElementById('packetA');
+            pA.style.display = "flex";
+            pA.classList.remove('collision');
+            pA.style.left = "60px";
+            wireActiveA = true;
+            updateWireStatus("Station A sending frame...", false);
+
+            let pos = 60;
+            const timer = setInterval(() => {
+                pos += 12;
+                pA.style.left = pos + "px";
+                if (pos >= 380 || !wireActiveA) {
+                    clearInterval(timer);
+                    if (pos >= 380 && !pA.classList.contains('collision')) {
+                        updateWireStatus("Station A frame delivered successfully!", false);
+                    }
+                }
+            }, 50);
+        }
+
+        function sendStationB() {
+            const pB = document.getElementById('packetB');
+            pB.style.display = "flex";
+            pB.classList.remove('collision');
+            pB.style.right = "60px";
+            wireActiveB = true;
+            updateWireStatus("Station B sending frame...", false);
+
+            let pos = 60;
+            const timer = setInterval(() => {
+                pos += 12;
+                pB.style.right = pos + "px";
+                if (pos >= 380 || !wireActiveB) {
+                    clearInterval(timer);
+                    if (pos >= 380 && !pB.classList.contains('collision')) {
+                        updateWireStatus("Station B frame delivered successfully!", false);
+                    }
+                }
+            }, 50);
+        }
+
+        function simulateCollisionScenario() {
+            resetWire();
+            sendStationA();
+            setTimeout(() => {
+                sendStationB();
+                setTimeout(() => {
+                    document.getElementById('packetA').classList.add('collision');
+                    document.getElementById('packetB').classList.add('collision');
+                    updateWireStatus("💥 COLLISION! Both stations sensed idle line due to delay.", true);
+                }, 600);
+            }, 200);
+        }
+
+        function resetWire() {
+            wireActiveA = false;
+            wireActiveB = false;
+            const pA = document.getElementById('packetA');
+            const pB = document.getElementById('packetB');
+            pA.style.display = "none";
+            pB.style.display = "none";
+            pA.classList.remove('collision');
+            pB.classList.remove('collision');
+            updateWireStatus("Wire is Idle", false);
+        }
+
+        // Section 8: Persistence Modes
+        const persistenceTexts = {
+            '1-p': "<strong style='color:var(--primary);'>1-Persistent Mode:</strong> The device keeps listening continuously. The very instant the channel goes idle, it transmits immediately. <em>Tradeoff:</em> No idle time wasted, but high risk of collision if multiple stations were waiting for the channel to clear!",
+            'non-p': "<strong style='color:var(--secondary);'>Non-Persistent Mode:</strong> If the channel is busy, the station waits a random amount of time before checking again. <em>Tradeoff:</em> Greatly reduces collisions, but the channel might sit unused while devices wait.",
+            'p-p': "<strong style='color:var(--accent-cyan);'>p-Persistent Mode:</strong> When the channel is idle, the device transmits with probability <em>p</em>. With probability <em>1 - p</em>, it waits for the next time slot. Balances throughput with lower collision risk.",
+            'o-p': "<strong style='color:var(--warning);'>O-Persistent Mode:</strong> Stations are given a fixed assigned turn order by a central supervisor, eliminating collisions completely."
+        };
+        function showPersistence(mode, el) {
+            document.querySelectorAll('.tab-btn').forEach(p => p.classList.remove('active'));
+            if (el) el.classList.add('active');
+            document.getElementById('persistenceDetailBox').innerHTML = persistenceTexts[mode];
+        }
+
+        // Section 10: Quiz
+        const quizData = [
+            {
+                q: "What is the main weakness of Simple Even Parity?",
+                options: [
+                    "It is too complicated to implement.",
+                    "It misses errors when an even number of bits flip (2, 4, 6 bits).",
+                    "It cannot catch single-bit errors.",
+                    "It requires adding half the message size in extra bits."
+                ],
+                correct: 1,
+                explanation: "When an even number of bits flip, the count of 1s stays even, so the check falsely passes."
+            },
+            {
+                q: "What can Two-Dimensional Parity do that Simple Parity cannot?",
+                options: [
+                    "It can detect and locate 1-bit errors to fix them automatically.",
+                    "It eliminates the need for parity bits.",
+                    "It fixes 4-bit rectangular errors.",
+                    "It stops physical electrical noise from happening."
+                ],
+                correct: 0,
+                explanation: "Because row parity and column parity cross at the exact flipped bit, you can locate it and flip it back."
+            },
+            {
+                q: "In CRC, what operation replaces standard subtraction during binary division?",
+                options: [
+                    "1's complement addition",
+                    "Bitwise AND",
+                    "Modulo-2 XOR (exclusive OR)",
+                    "Multiplication"
+                ],
+                correct: 2,
+                explanation: "Modulo-2 binary division uses XOR instead of subtraction—meaning no carries or borrows."
+            },
+            {
+                q: "Why does Slotted ALOHA have double the efficiency of Pure ALOHA?",
+                options: [
+                    "It cuts the vulnerable collision window from 2 frames to 1 frame.",
+                    "It requires fiber optic cables.",
+                    "It uses tokens to prevent collisions.",
+                    "It increases transmission signal power."
+                ],
+                correct: 0,
+                explanation: "By forcing transmissions to begin only at slot boundaries, partial frame overlaps are eliminated."
+            },
+            {
+                q: "What major feature did DOCSIS 3.0 introduce to achieve speeds above 340 Mbps?",
+                options: [
+                    "Full Duplex fiber replacement",
+                    "Channel Bonding (combining multiple channels into one)",
+                    "Token Ring scheduling",
+                    "Satellite antennas"
+                ],
+                correct: 1,
+                explanation: "Channel bonding combines multiple 6 MHz or 8 MHz channels together, multiplying bandwidth like adding lanes to a highway."
+            }
+        ];
+
+        let currentQuizIdx = 0;
+        let userScore = 0;
+
+        function loadQuizQuestion() {
+            const q = quizData[currentQuizIdx];
+            document.getElementById('quizIndex').textContent = currentQuizIdx + 1;
+            document.getElementById('quizQuestionText').textContent = q.q;
+            const container = document.getElementById('quizOptionsContainer');
+            container.innerHTML = "";
+            const feedback = document.getElementById('quizFeedbackBox');
+            feedback.style.display = "none";
+            document.getElementById('nextQuizBtn').style.display = "none";
+
+            q.options.forEach((opt, idx) => {
+                const optBtn = document.createElement('div');
+                optBtn.className = "quiz-option";
+                optBtn.innerHTML = `<strong>${String.fromCharCode(65 + idx)}.</strong> <span>${opt}</span>`;
+                optBtn.onclick = () => selectQuizAnswer(idx, optBtn);
+                container.appendChild(optBtn);
+            });
+        }
+
+        function selectQuizAnswer(idx, element) {
+            const q = quizData[currentQuizIdx];
+            const allOpts = document.querySelectorAll('.quiz-option');
+            allOpts.forEach(o => o.style.pointerEvents = 'none');
+
+            const feedback = document.getElementById('quizFeedbackBox');
+            feedback.style.display = "block";
+
+            if (idx === q.correct) {
+                element.classList.add('correct');
+                userScore++;
+                document.getElementById('quizScore').textContent = userScore;
+                feedback.style.background = "var(--success-light)";
+                feedback.style.borderLeft = "3px solid var(--success)";
+                feedback.innerHTML = `<strong>Correct!</strong> ${q.explanation}`;
+            } else {
+                element.classList.add('wrong');
+                allOpts[q.correct].classList.add('correct');
+                feedback.style.background = "var(--danger-light)";
+                feedback.style.borderLeft = "3px solid var(--danger)";
+                feedback.innerHTML = `<strong>Not quite.</strong> ${q.explanation}`;
+            }
+
+            if (currentQuizIdx < quizData.length - 1) {
+                document.getElementById('nextQuizBtn').style.display = "inline-flex";
+            } else {
+                document.getElementById('restartQuizBtn').style.display = "inline-flex";
+            }
+        }
+
+        function loadNextQuiz() {
+            currentQuizIdx++;
+            loadQuizQuestion();
+        }
+
+        function restartQuiz() {
+            currentQuizIdx = 0;
+            userScore = 0;
+            document.getElementById('quizScore').textContent = "0";
+            document.getElementById('restartQuizBtn').style.display = "none";
+            loadQuizQuestion();
+        }
+        loadQuizQuestion();
+    </script>
+</body>
+
+</html>
